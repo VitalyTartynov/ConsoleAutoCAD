@@ -102,7 +102,8 @@ namespace ConsoleAutoCad.Debugger.VsDebug
             var monikerRegex = new Regex(@"!VisualStudio.DTE\.\d+\.\d+\:" + processId, RegexOptions.IgnoreCase);
             if (!String.IsNullOrEmpty(name) && monikerRegex.IsMatch(name))
             {
-                Marshal.ThrowExceptionForHR(rot.GetObject(moniker, out var runningObject));
+                object runningObject;
+                Marshal.ThrowExceptionForHR(rot.GetObject(moniker, out runningObject));
                 return runningObject as DTE;
             }
 
