@@ -47,11 +47,10 @@ namespace ConsoleAutoCad.Debugger.VsDebug
         /// </see></returns>
         private static DTE GetDte(int processId)
         {
-            object runningObject = null;
-
             IBindCtx bindCtx = null;
             IRunningObjectTable rot = null;
             IEnumMoniker enumMonikers = null;
+            DTE runningObject = null;
 
             try
             {
@@ -63,7 +62,7 @@ namespace ConsoleAutoCad.Debugger.VsDebug
                 var numberFetched = IntPtr.Zero;
                 while (enumMonikers.Next(1, moniker, numberFetched) == 0)
                 {
-                    runningObject = GetDte(processId, moniker[0], bindCtx, rot, runningObject);
+                    runningObject = GetDte(processId, moniker[0], bindCtx, rot);
                 }
             }
             finally
@@ -84,11 +83,10 @@ namespace ConsoleAutoCad.Debugger.VsDebug
                 }
             }
 
-            return runningObject as DTE;
+            return runningObject;
         }
 
-        private static object GetDte(int processId, IMoniker moniker, IBindCtx bindCtx, IRunningObjectTable rot,
-            object runningObject)
+        private static DTE GetDte(int processId, IMoniker moniker, IBindCtx bindCtx, IRunningObjectTable rot)
         {
             string name = null;
 
@@ -104,11 +102,11 @@ namespace ConsoleAutoCad.Debugger.VsDebug
             var monikerRegex = new Regex(@"!VisualStudio.DTE\.\d+\.\d+\:" + processId, RegexOptions.IgnoreCase);
             if (!String.IsNullOrEmpty(name) && monikerRegex.IsMatch(name))
             {
-                Marshal.ThrowExceptionForHR(rot.GetObject(moniker, out runningObject));
-                return runningObject;
+                Marshal.ThrowExceptionForHR(rot.GetObject(moniker, out var runningObject));
+                return runningObject as DTE;
             }
 
-            return runningObject;
+            return null;
         }
     }
 }
