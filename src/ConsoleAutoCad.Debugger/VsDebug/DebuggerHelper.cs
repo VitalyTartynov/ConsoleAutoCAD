@@ -2,8 +2,6 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text.RegularExpressions;
 using EnvDTE;
 using NLog;
 using Process = EnvDTE.Process;
@@ -52,7 +50,7 @@ namespace ConsoleAutoCad.Debugger.VsDebug
                 //dte = (DTE)Marshal.GetActiveObject(vsversion);
 
                 var vsProcess = System.Diagnostics.Process.GetProcesses().First(x => x.ProcessName.Contains("devenv"));
-                dte = GetDte(vsProcess.Id, 10);
+                dte = DteHelper.GetDte(vsProcess.Id, 10);
 
                 if (dte != null)
                 {
@@ -89,105 +87,6 @@ namespace ConsoleAutoCad.Debugger.VsDebug
                     System.Threading.Thread.Sleep(25);
                 }
             }
-        }
-
-        /// <summary>
-        /// Gets the DTE object from any devenv process.
-        /// </summary>
-        /// <remarks>
-        /// After starting devenv.exe, the DTE object is not ready. We need to try repeatedly and fail after the
-        /// timeout.
-        /// </remarks>
-        /// <param name="processId"></param>
-        /// <param name="timeout">Timeout in seconds.</param>
-        /// <returns>
-        /// Retrieved DTE object or <see langword="null"> if not found.
-        /// </see></returns>
-        private static DTE GetDte(int processId, int timeout)
-        {
-            DTE res = null;
-            var startTime = DateTime.Now;
-
-            while (res == null && DateTime.Now.Subtract(startTime).Seconds < timeout)
-            {
-                System.Threading.Thread.Sleep(1000);
-                res = GetDte(processId);
-            }
-
-            return res;
-        }
-
-        [DllImport("ole32.dll")]
-        private static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
-
-        /// <summary>
-        /// Gets the DTE object from any devenv process.
-        /// </summary>
-        /// <param name="processId"></param>
-        /// <returns>
-        /// Retrieved DTE object or <see langword="null"> if not found.
-        /// </see></returns>
-        private static DTE GetDte(int processId)
-        {
-            object runningObject = null;
-
-            IBindCtx bindCtx = null;
-            IRunningObjectTable rot = null;
-            IEnumMoniker enumMonikers = null;
-
-            try
-            {
-                Marshal.ThrowExceptionForHR(CreateBindCtx(reserved: 0, ppbc: out bindCtx));
-                bindCtx.GetRunningObjectTable(out rot);
-                rot.EnumRunning(out enumMonikers);
-
-                IMoniker[] moniker = new IMoniker[1];
-                IntPtr numberFetched = IntPtr.Zero;
-                while (enumMonikers.Next(1, moniker, numberFetched) == 0)
-                {
-                    IMoniker runningObjectMoniker = moniker[0];
-
-                    string name = null;
-
-                    try
-                    {
-                        if (runningObjectMoniker != null)
-                        {
-                            runningObjectMoniker.GetDisplayName(bindCtx, null, out name);
-                        }
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        // Do nothing, there is something in the ROT that we do not have access to.
-                    }
-
-                    Regex monikerRegex = new Regex(@"!VisualStudio.DTE\.\d+\.\d+\:" + processId, RegexOptions.IgnoreCase);
-                    if (!string.IsNullOrEmpty(name) && monikerRegex.IsMatch(name))
-                    {
-                        Marshal.ThrowExceptionForHR(rot.GetObject(runningObjectMoniker, out runningObject));
-                        break;
-                    }
-                }
-            }
-            finally
-            {
-                if (enumMonikers != null)
-                {
-                    Marshal.ReleaseComObject(enumMonikers);
-                }
-
-                if (rot != null)
-                {
-                    Marshal.ReleaseComObject(rot);
-                }
-
-                if (bindCtx != null)
-                {
-                    Marshal.ReleaseComObject(bindCtx);
-                }
-            }
-
-            return runningObject as DTE;
         }
 
         /// <summary>
