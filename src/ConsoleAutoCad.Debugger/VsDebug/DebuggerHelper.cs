@@ -47,15 +47,15 @@ namespace ConsoleAutoCad.Debugger.VsDebug
             try
             {
                 // Работает только с 1 экземпляром запущенной VS 
-                //dte = (DTE)Marshal.GetActiveObject(vsversion);
+                dte = (DTE)Marshal.GetActiveObject(vsversion);
 
-                var vsProcess = System.Diagnostics.Process.GetProcesses().First(x => x.ProcessName.Contains("devenv"));
-                dte = DteHelper.GetDte(vsProcess.Id, 10);
+                //var vsProcess = System.Diagnostics.Process.GetProcesses().First(x => x.ProcessName.Contains("devenv"));
+                //dte = DteHelper.GetDte(vsProcess.Id, 10);
 
-                if (dte != null)
-                {
-                    logger.Debug($"Found Visual Studio {dte.Edition} version {dte.Version}");
-                }
+                //if (dte != null)
+                //{
+                //    logger.Debug($"Found Visual Studio {dte.Edition} version {dte.Version}");
+                //}
             }
             catch (COMException ex)
             {

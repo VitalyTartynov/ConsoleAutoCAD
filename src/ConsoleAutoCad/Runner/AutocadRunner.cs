@@ -190,7 +190,7 @@ namespace ConsoleAutoCad.Runner
 
             if (_attachDebuggerIfNeeded && System.Diagnostics.Debugger.IsAttached)
             {
-                var pathToDebuggerDll = Path.Combine(PathHelper.AssemblyDirectory(Assembly.GetExecutingAssembly()), "TomskNipi.Component.ConsoleAutoCad.Debugger.dll");
+                var pathToDebuggerDll = Path.Combine(PathHelper.AssemblyDirectory(Assembly.GetExecutingAssembly()), "ConsoleAutoCad.Debugger.dll");
                 if (!File.Exists(pathToDebuggerDll))
                 {
                     throw new ApplicationException($"Debug plugin was not found! File '{pathToDebuggerDll}' doesn't exist!");

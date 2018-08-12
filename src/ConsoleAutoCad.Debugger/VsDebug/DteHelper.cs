@@ -62,7 +62,7 @@ namespace ConsoleAutoCad.Debugger.VsDebug
                 var numberFetched = IntPtr.Zero;
                 while (enumMonikers.Next(1, moniker, numberFetched) == 0)
                 {
-                    runningObject = GetDte(processId, moniker[0], bindCtx, rot);
+                    runningObject = GetDte(bindCtx, processId, moniker[0], rot);
                 }
             }
             finally
@@ -86,7 +86,7 @@ namespace ConsoleAutoCad.Debugger.VsDebug
             return runningObject;
         }
 
-        private static DTE GetDte(int processId, IMoniker moniker, IBindCtx bindCtx, IRunningObjectTable rot)
+        private static DTE GetDte(IBindCtx bindCtx, int processId, IMoniker moniker, IRunningObjectTable rot)
         {
             string name = null;
 
